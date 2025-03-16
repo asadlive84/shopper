@@ -2,6 +2,7 @@ package rabbitmq
 
 import (
 	"context"
+	"fmt"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.opentelemetry.io/otel"
@@ -60,6 +61,11 @@ func (c *Client) Setup(exchange, queue string) error {
 }
 
 func (c *Client) Publish(ctx context.Context, exchange, message string) error {
+	fmt.Println("==============Publish RabbitMQ==========================")
+	fmt.Printf("exchange %+v\n", exchange)
+	fmt.Printf("message %+v\n", message)
+	fmt.Println("========================================")
+
 	ctx, span := c.Tracer.Start(ctx, "rabbitmq.publish",
 		trace.WithAttributes(
 			attribute.String("exchange", exchange),
@@ -110,11 +116,9 @@ func (c *Client) Consume(queue string, consumerFunc func(context.Context, string
 }
 
 func (c *Client) PublishLogoutEvent(ctx context.Context, userID string) error {
-    message := "logout:" + userID
-    return c.Publish(ctx, "user_events", message)
+	message := "logout:" + userID
+	return c.Publish(ctx, "user_events", message)
 }
-
-
 
 // Start consuming logout events
 // client.Consume("user_logout_queue", handleLogoutEvent)

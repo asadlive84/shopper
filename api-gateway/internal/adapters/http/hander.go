@@ -55,9 +55,7 @@ func NewHandler(apiService ports.APIPort, jwtSecret string, logger *zap.Logger, 
 }
 
 func (h *Handler) SetupRoutes(r *gin.Engine) {
-	r.Use(LoggerMiddleware(h.logger))
-	r.Use(TracingMiddleware())
-	r.Use(PrometheusMiddleware())
+	r.Use(LoggerMiddleware(h.logger), TracingMiddleware(), PrometheusMiddleware())
 	r.Use(CORSMiddleware())
 
 	r.POST("/login", h.Login)
@@ -71,7 +69,7 @@ func (h *Handler) SetupRoutes(r *gin.Engine) {
 	protected.GET("/users", h.ListUsers)
 	protected.PUT("/user/:id", h.UpdateUser)
 
-	r.GET("/ws", h.WebSocketHandler)
+	r.GET("/ws", CORSMiddleware(), h.WebSocketHandler)
 
 }
 

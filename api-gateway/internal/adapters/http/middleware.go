@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gin-contrib/cors"
+	// "github.com/gin-contrib/cors"
 )
 
 func PrometheusMiddleware() gin.HandlerFunc {
@@ -98,12 +98,19 @@ func JWTAuthMiddleware(jwtSecret string, logger *zap.Logger) gin.HandlerFunc {
 }
 
 func CORSMiddleware() gin.HandlerFunc {
-	config := cors.DefaultConfig()
-	config.AllowAllOrigins = true                                             // সব ডোমেইন থেকে অনুমতি দিন
-	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"} // অনুমোদিত HTTP মেথড
-	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization"} // অনুমোদিত হেডার
+    return func(c *gin.Context) {
+        // Set CORS headers
+        c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+        c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+        c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
-	// CORS মিডলওয়্যার তৈরি করুন
-	return cors.New(config)
+        // Handle preflight requests
+        if c.Request.Method == "OPTIONS" {
+            c.AbortWithStatus(http.StatusNoContent)
+            return
+        }
 
+        // Pass control to the next middleware or route handler
+        c.Next()
+    }
 }
